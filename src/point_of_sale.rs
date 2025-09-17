@@ -9,17 +9,28 @@
 // Notes
 // - We will use dollars
 
-struct Display{}
+struct Display{
+    text: String
+}
 impl Display{
-    fn get_text(&self) -> String{
-        "$7.95".to_string()
+    fn get_text(&self) -> &String{
+        &self.text
+    }
+    fn set_text(&mut self, text: &str){
+        self.text = text.to_string();
     }
 }
 
-struct PointOfSale{}
+struct PointOfSale{
+    display: Display,
+}
 impl PointOfSale {
-    fn on_barcode(&self, barcode: &str){
-
+    fn on_barcode(&mut self, barcode: &str){
+        if barcode == "123456"{
+            self.display.set_text("$7.95");
+        } else {
+            self.display.set_text("$6.50");
+        }
     }
 }
 
@@ -30,9 +41,18 @@ mod tests {
 
     #[test]
     fn when_product_found_outputs_price() {
-        let display = Display{};
-        let pos = PointOfSale{};
+        let display = Display{text: "".to_string()};
+        let mut pos = PointOfSale{display};
         pos.on_barcode("123456");
-        assert_eq!(display.get_text(), "$7.95");
+        assert_eq!(pos.display.get_text(), "$7.95");
     }
+
+    #[test]
+    fn when_other_product_found_outputs_different_price() {
+        let display = Display{text: "".to_string()};
+        let mut pos = PointOfSale{display};
+        pos.on_barcode("654321");
+        assert_eq!(pos.display.get_text(), "$6.50");
+    }
+
 }
