@@ -28,8 +28,10 @@ impl PointOfSale {
     fn on_barcode(&mut self, barcode: &str){
         if barcode == "123456"{
             self.display.set_text("$7.95");
-        } else {
+        } else if barcode == "654321" {
             self.display.set_text("$6.50");
+        } else {
+            self.display.set_text("product not found");
         }
     }
 }
@@ -53,6 +55,14 @@ mod tests {
         let mut pos = PointOfSale{display};
         pos.on_barcode("654321");
         assert_eq!(pos.display.get_text(), "$6.50");
+    }
+
+    #[test]
+    fn product_not_found() {
+        let display = Display{text: "".to_string()};
+        let mut pos = PointOfSale{display};
+        pos.on_barcode("999999");
+        assert_eq!(pos.display.get_text(), "product not found");
     }
 
 }
