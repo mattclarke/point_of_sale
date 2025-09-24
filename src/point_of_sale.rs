@@ -1,19 +1,19 @@
 // Tests we need:
 // - product found -> output price
-// - product not found
+// - product not found   - Done
 // - price is a price
-// - invalid, empty string and null(?)
+// - invalid, empty string and null(?)  !! Next time
 // -
 //
 //
 // Notes
 // - We will use dollars
 
-struct Display{
-    text: String
+pub struct Display{
+    pub text: String
 }
 impl Display{
-    fn get_text(&self) -> &String{
+    pub fn get_text(&self) -> &String{
         &self.text
     }
     fn set_text(&mut self, text: &str){
@@ -21,11 +21,15 @@ impl Display{
     }
 }
 
-struct PointOfSale{
-    display: Display,
+pub struct PointOfSale{
+    pub display: Display,
 }
 impl PointOfSale {
-    fn on_barcode(&mut self, barcode: &str){
+    pub fn on_barcode(&mut self, barcode: &str){
+        if barcode.is_empty() {
+            self.display.set_text("error: no barcode read");
+            return;
+        }
         if barcode == "123456"{
             self.display.set_text("$7.95");
         } else if barcode == "654321" {
@@ -63,6 +67,14 @@ mod tests {
         let mut pos = PointOfSale{display};
         pos.on_barcode("999999");
         assert_eq!(pos.display.get_text(), "product not found");
+    }
+
+    #[test]
+    fn displays_error_on_empty_barcode() {
+        let display = Display{text: "".to_string()};
+        let mut pos = PointOfSale{display};
+        pos.on_barcode("");
+        assert_eq!(pos.display.get_text(), "error: no barcode read");
     }
 
 }
