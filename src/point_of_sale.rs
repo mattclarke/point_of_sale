@@ -39,13 +39,13 @@ impl PointOfSale {
             return;
         }
         if self.inventory.contains_key(barcode){
-            self.display_price(barcode);
+            self.display_price(&self.get_price(barcode));
         } else {
             self.display.display_product_not_found();
         }
     }
-    pub fn display_price(&mut self, barcode: &str) {
-        self.display.set_text(&self.get_price(barcode));
+    pub fn display_price(&mut self, price: &str) {
+        self.display.set_text(price);
     }
     pub fn get_price(&self, barcode: &str) -> String {
         self.inventory[barcode].to_string()
