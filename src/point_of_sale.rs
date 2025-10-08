@@ -41,14 +41,17 @@ impl PointOfSale {
             self.display.display_no_barcode_read();
             return;
         }
-        if self.product_found(barcode){
-            self.display.display_price(&self.get_price(barcode));
-        } else {
-            self.display.display_product_not_found();
+        match self.get_price(barcode) {
+            Some(price) => self.display.display_price(&price),
+            None => self.display.display_product_not_found(),
         }
     }
-    pub fn get_price(&self, barcode: &str) -> String {
-        self.inventory[barcode].to_string()
+    pub fn get_price(&self, barcode: &str) -> Option<String> {
+        if self.product_found(barcode){
+            Some(self.inventory[barcode].to_string())
+        } else {
+            None
+        }
     }
     pub fn product_found(&self, barcode: &str) -> bool {
         self.inventory.contains_key(barcode)
