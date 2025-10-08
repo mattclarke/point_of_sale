@@ -29,7 +29,7 @@ pub struct PointOfSale{
 impl PointOfSale {
     pub fn on_barcode(&mut self, barcode: &str){
         if barcode.is_empty() {
-            self.display.set_text("error: no barcode read");
+            self.display_no_barcode_read();
             return;
         }
         if self.inventory.contains_key(barcode){
@@ -40,7 +40,10 @@ impl PointOfSale {
     }
     pub fn display_product_not_found(&mut self) {
         self.display.set_text("product not found");
-    } 
+    }
+    pub fn display_no_barcode_read(&mut self) {
+        self.display.set_text("error: no barcode read");
+    }
 }
 
 
