@@ -33,7 +33,7 @@ impl PointOfSale {
             return;
         }
         if self.inventory.contains_key(barcode){
-            self.display.set_text(self.inventory[barcode]);
+            self.display_price(barcode);
         } else {
             self.display_product_not_found();
         }
@@ -43,6 +43,9 @@ impl PointOfSale {
     }
     pub fn display_no_barcode_read(&mut self) {
         self.display.set_text("error: no barcode read");
+    }
+    pub fn display_price(&mut self, barcode: &str) {
+        self.display.set_text(self.inventory[barcode]);
     }
 }
 
