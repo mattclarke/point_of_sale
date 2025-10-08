@@ -20,6 +20,9 @@ impl Display{
     fn set_text(&mut self, text: &str){
         self.text = text.to_string();
     }
+    pub fn display_product_not_found(&mut self) {
+        self.set_text("product not found");
+    }
 }
 
 pub struct PointOfSale{
@@ -35,12 +38,10 @@ impl PointOfSale {
         if self.inventory.contains_key(barcode){
             self.display_price(barcode);
         } else {
-            self.display_product_not_found();
+            self.display.display_product_not_found();
         }
     }
-    pub fn display_product_not_found(&mut self) {
-        self.display.set_text("product not found");
-    }
+    
     pub fn display_no_barcode_read(&mut self) {
         self.display.set_text("error: no barcode read");
     }
