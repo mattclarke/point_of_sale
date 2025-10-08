@@ -35,10 +35,14 @@ impl PointOfSale {
         if self.inventory.contains_key(barcode){
             self.display.set_text(self.inventory[barcode]);
         } else {
-            self.display.set_text("product not found");
+            self.display_product_not_found();
         }
     }
+    pub fn display_product_not_found(&mut self) {
+        self.display.set_text("product not found");
+    } 
 }
+
 
 
 #[cfg(test)]
