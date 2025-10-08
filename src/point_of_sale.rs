@@ -45,7 +45,10 @@ impl PointOfSale {
         }
     }
     pub fn display_price(&mut self, barcode: &str) {
-        self.display.set_text(self.inventory[barcode]);
+        self.display.set_text(&self.get_price(barcode));
+    }
+    pub fn get_price(&self, barcode: &str) -> String {
+        self.inventory[barcode].to_string()
     }
 }
 
