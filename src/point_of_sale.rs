@@ -26,6 +26,9 @@ impl Display{
     pub fn display_no_barcode_read(&mut self) {
         self.set_text("error: no barcode read");
     }
+    pub fn display_price(&mut self, price: &str) {
+        self.set_text(price);
+    }
 }
 
 pub struct PointOfSale{
@@ -39,13 +42,10 @@ impl PointOfSale {
             return;
         }
         if self.inventory.contains_key(barcode){
-            self.display_price(&self.get_price(barcode));
+            self.display.display_price(&self.get_price(barcode));
         } else {
             self.display.display_product_not_found();
         }
-    }
-    pub fn display_price(&mut self, price: &str) {
-        self.display.set_text(price);
     }
     pub fn get_price(&self, barcode: &str) -> String {
         self.inventory[barcode].to_string()
