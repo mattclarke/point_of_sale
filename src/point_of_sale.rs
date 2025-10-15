@@ -41,16 +41,9 @@ impl PointOfSale {
             self.display.display_no_barcode_read();
             return;
         }
-        match self.get_price(barcode) {
+        match self.inventory.get_price(barcode) {
             Some(price) => self.display.display_price(&price),
             None => self.display.display_product_not_found(),
-        }
-    }
-    pub fn get_price(&self, barcode: &str) -> Option<String> {
-        if self.inventory.product_found(barcode){
-            Some(self.inventory.products[barcode].to_string())
-        } else {
-            None
         }
     }
 }
@@ -59,6 +52,13 @@ pub struct Inventory{
     pub products: HashMap<&'static str, &'static str>,
 }
 impl Inventory{
+    pub fn get_price(&self, barcode: &str) -> Option<String> {
+        if self.product_found(barcode){
+            Some(self.products[barcode].to_string())
+        } else {
+            None
+        }
+    }
     pub fn product_found(&self, barcode: &str) -> bool {
         self.products.contains_key(barcode)
     }
