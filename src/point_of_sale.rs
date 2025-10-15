@@ -47,19 +47,21 @@ impl PointOfSale {
         }
     }
     pub fn get_price(&self, barcode: &str) -> Option<String> {
-        if self.product_found(barcode){
+        if self.inventory.product_found(barcode){
             Some(self.inventory.products[barcode].to_string())
         } else {
             None
         }
     }
-    pub fn product_found(&self, barcode: &str) -> bool {
-        self.inventory.products.contains_key(barcode)
-    }
 }
 
 pub struct Inventory{
     pub products: HashMap<&'static str, &'static str>,
+}
+impl Inventory{
+    pub fn product_found(&self, barcode: &str) -> bool {
+        self.products.contains_key(barcode)
+    }
 }
 
 #[cfg(test)]
