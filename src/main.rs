@@ -5,13 +5,14 @@ use std::{collections::HashMap, io};
 use crate::point_of_sale::{Inventory, PointOfSale};
 
 fn main() {
-    
-    let display = point_of_sale::Display{text: "".to_string()};
-    let inventory = HashMap::from([
-        ("123456", "$7.95"),
-        ("654321", "$6.50")
-    ]);
-    let mut pos = PointOfSale{display, inventory: Inventory{products: inventory}};
+    let display = point_of_sale::Display {
+        text: "".to_string(),
+    };
+    let inventory = HashMap::from([("123456", "$7.95"), ("654321", "$6.50")]);
+    let mut pos = PointOfSale {
+        display,
+        inventory: Inventory::new(inventory),
+    };
     let mut barcode = String::new();
 
     println!("Enter barcode:");
@@ -23,5 +24,4 @@ fn main() {
 
     pos.on_barcode(&barcode);
     println!("{}", pos.display.get_text());
-
 }
