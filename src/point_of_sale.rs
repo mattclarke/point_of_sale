@@ -33,7 +33,7 @@ impl Display{
 
 pub struct PointOfSale{
     pub display: Display,
-    pub inventory: HashMap<&'static str, &'static str>,
+    pub inventory: Inventory,
 }
 impl PointOfSale {
     pub fn on_barcode(&mut self, barcode: &str){
@@ -48,17 +48,19 @@ impl PointOfSale {
     }
     pub fn get_price(&self, barcode: &str) -> Option<String> {
         if self.product_found(barcode){
-            Some(self.inventory[barcode].to_string())
+            Some(self.inventory.products[barcode].to_string())
         } else {
             None
         }
     }
     pub fn product_found(&self, barcode: &str) -> bool {
-        self.inventory.contains_key(barcode)
+        self.inventory.products.contains_key(barcode)
     }
 }
 
-
+pub struct Inventory{
+    pub products: HashMap<&'static str, &'static str>,
+}
 
 #[cfg(test)]
 mod tests {
@@ -71,7 +73,7 @@ mod tests {
             ("123456", "$7.95"),
             ("654321", "$6.50")
         ]);
-        let mut pos = PointOfSale{display, inventory};
+        let mut pos = PointOfSale{display, inventory: Inventory{products: inventory}};
         pos.on_barcode("123456");
         assert_eq!(pos.display.get_text(), "$7.95");
     }
@@ -83,7 +85,7 @@ mod tests {
             ("123456", "$7.95"),
             ("654321", "$6.50")
         ]);
-        let mut pos = PointOfSale{display, inventory};
+        let mut pos = PointOfSale{display, inventory: Inventory{products: inventory}};
         pos.on_barcode("654321");
         assert_eq!(pos.display.get_text(), "$6.50");
     }
@@ -92,7 +94,7 @@ mod tests {
     fn product_not_found() {
         let display = Display{text: "".to_string()};
         let inventory = HashMap::new();
-        let mut pos = PointOfSale{display, inventory};
+        let mut pos = PointOfSale{display, inventory: Inventory{products: inventory}};
         pos.on_barcode("999999");
         assert_eq!(pos.display.get_text(), "product not found");
     }
@@ -101,7 +103,7 @@ mod tests {
     fn displays_error_on_empty_barcode() {
         let display = Display{text: "".to_string()};
         let inventory = HashMap::new();
-        let mut pos = PointOfSale{display, inventory};
+        let mut pos = PointOfSale{display, inventory: Inventory{products: inventory}};
         pos.on_barcode("");
         assert_eq!(pos.display.get_text(), "error: no barcode read");
     }

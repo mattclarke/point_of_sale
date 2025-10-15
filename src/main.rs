@@ -2,7 +2,7 @@ mod point_of_sale;
 
 use std::{collections::HashMap, io};
 
-use crate::point_of_sale::PointOfSale;
+use crate::point_of_sale::{Inventory, PointOfSale};
 
 fn main() {
     
@@ -11,7 +11,7 @@ fn main() {
         ("123456", "$7.95"),
         ("654321", "$6.50")
     ]);
-    let mut pos = PointOfSale{display, inventory};
+    let mut pos = PointOfSale{display, inventory: Inventory{products: inventory}};
     let mut barcode = String::new();
 
     println!("Enter barcode:");
