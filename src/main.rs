@@ -12,6 +12,7 @@ fn main() {
     let mut pos = PointOfSale {
         display,
         inventory: Inventory::new(inventory),
+        sales_tax: None,
     };
     let mut barcode = String::new();
 

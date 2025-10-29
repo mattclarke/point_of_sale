@@ -3,11 +3,10 @@
 // Calculate sales tax and add to price
 // Sell one item reduces inventory
 // Sell multiple items
-// 
+//
 
 // price in cents as u32
-// keep dollar sign 
-
+// keep dollar sign
 
 use std::collections::HashMap;
 
@@ -28,7 +27,7 @@ impl Display {
         self.set_text("error: no barcode read");
     }
     pub fn display_price(&mut self, price: i32) {
-        let price_as_string = format!("${}.{}", price / 100, price % 100);
+        let price_as_string = format!("${}.{:0>2}", price / 100, price % 100);
         self.set_text(&price_as_string);
     }
 }
@@ -36,6 +35,7 @@ impl Display {
 pub struct PointOfSale {
     pub display: Display,
     pub inventory: Inventory,
+    pub sales_tax: Option<f32>,
 }
 impl PointOfSale {
     pub fn on_barcode(&mut self, barcode: &str) {
@@ -44,12 +44,18 @@ impl PointOfSale {
             return;
         }
         match self.inventory.get_price(barcode) {
-            Some(price) => self.display.display_price(price),
+            Some(price) => {
+                let price = self.apply_tax(price);
+                self.display.display_price(price)
+            }
             None => self.display.display_product_not_found(),
         }
     }
-    fn apply_tax(&mut self, price: &str) {
-        
+    fn apply_tax(&mut self, price: i32) -> i32 {
+        match self.sales_tax {
+            Some(tax) => (price as f32 * (1.0 + tax)) as i32,
+            None => price,
+        }
     }
 }
 
@@ -85,6 +91,7 @@ mod tests {
         let mut pos = PointOfSale {
             display,
             inventory: Inventory::new(inventory),
+            sales_tax: None,
         };
         pos.on_barcode("123456");
         assert_eq!(pos.display.get_text(), "$7.95");
@@ -99,6 +106,7 @@ mod tests {
         let mut pos = PointOfSale {
             display,
             inventory: Inventory::new(inventory),
+            sales_tax: None,
         };
         pos.on_barcode("654321");
         assert_eq!(pos.display.get_text(), "$6.50");
@@ -112,6 +120,7 @@ mod tests {
         let mut pos = PointOfSale {
             display,
             inventory: Inventory::new(HashMap::new()),
+            sales_tax: None,
         };
         pos.on_barcode("999999");
         assert_eq!(pos.display.get_text(), "product not found");
@@ -125,23 +134,25 @@ mod tests {
         let mut pos = PointOfSale {
             display,
             inventory: Inventory::new(HashMap::new()),
+            sales_tax: None,
         };
         pos.on_barcode("");
         assert_eq!(pos.display.get_text(), "error: no barcode read");
     }
 
-    // #[test]
-    // fn displays_price_including_tax() {
-    //     let tax = 0.2;
-    //     let display = Display {
-    //         text: "".to_string(),
-    //     };
-    //     let inventory = HashMap::from([("123456", "$7.95"), ("654321", "$10.00")]);
-    //     let mut pos = PointOfSale {
-    //         display,
-    //         inventory: Inventory::new(inventory),
-    //     };
-    //     pos.on_barcode("654321");
-    //     assert_eq!(pos.display.get_text(), "$12.00");
-    // }
+    #[test]
+    fn displays_price_including_tax() {
+        let tax = 0.2;
+        let display = Display {
+            text: "".to_string(),
+        };
+        let inventory = HashMap::from([("123456", 795), ("654321", 1000)]);
+        let mut pos = PointOfSale {
+            display,
+            inventory: Inventory::new(inventory),
+            sales_tax: Some(tax),
+        };
+        pos.on_barcode("654321");
+        assert_eq!(pos.display.get_text(), "$12.00");
+    }
 }
