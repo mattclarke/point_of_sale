@@ -1,13 +1,3 @@
-// Features
-//
-// Calculate sales tax and add to price
-// Sell one item reduces inventory
-// Sell multiple items
-//
-
-// price in cents as u32
-// keep dollar sign
-
 use std::collections::HashMap;
 
 pub struct Display {
