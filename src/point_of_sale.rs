@@ -27,8 +27,9 @@ impl Display {
     pub fn display_no_barcode_read(&mut self) {
         self.set_text("error: no barcode read");
     }
-    pub fn display_price(&mut self, price: &str) {
-        self.set_text(price);
+    pub fn display_price(&mut self, price: i32) {
+        let price_as_string = format!("${}.{}", price / 100, price % 100);
+        self.set_text(&price_as_string);
     }
 }
 
@@ -43,7 +44,7 @@ impl PointOfSale {
             return;
         }
         match self.inventory.get_price(barcode) {
-            Some(price) => self.display.display_price(&price),
+            Some(price) => self.display.display_price(price),
             None => self.display.display_product_not_found(),
         }
     }
@@ -53,15 +54,15 @@ impl PointOfSale {
 }
 
 pub struct Inventory {
-    products: HashMap<&'static str, &'static str>,
+    products: HashMap<&'static str, i32>,
 }
 impl Inventory {
-    pub fn new(products: HashMap<&'static str, &'static str>) -> Inventory {
-        Inventory { products }
+    pub fn new(products: HashMap<&'static str, i32>) -> Inventory {
+        Inventory { products: products }
     }
-    pub fn get_price(&self, barcode: &str) -> Option<String> {
+    pub fn get_price(&self, barcode: &str) -> Option<i32> {
         if self.product_found(barcode) {
-            Some(self.products[barcode].to_string())
+            Some(self.products[barcode])
         } else {
             None
         }
@@ -80,7 +81,7 @@ mod tests {
         let display = Display {
             text: "".to_string(),
         };
-        let inventory = HashMap::from([("123456", "$7.95"), ("654321", "$6.50")]);
+        let inventory = HashMap::from([("123456", 795), ("654321", 650)]);
         let mut pos = PointOfSale {
             display,
             inventory: Inventory::new(inventory),
@@ -94,7 +95,7 @@ mod tests {
         let display = Display {
             text: "".to_string(),
         };
-        let inventory = HashMap::from([("123456", "$7.95"), ("654321", "$6.50")]);
+        let inventory = HashMap::from([("123456", 795), ("654321", 650)]);
         let mut pos = PointOfSale {
             display,
             inventory: Inventory::new(inventory),
@@ -108,10 +109,9 @@ mod tests {
         let display = Display {
             text: "".to_string(),
         };
-        let inventory = HashMap::new();
         let mut pos = PointOfSale {
             display,
-            inventory: Inventory::new(inventory),
+            inventory: Inventory::new(HashMap::new()),
         };
         pos.on_barcode("999999");
         assert_eq!(pos.display.get_text(), "product not found");
@@ -122,10 +122,9 @@ mod tests {
         let display = Display {
             text: "".to_string(),
         };
-        let inventory = HashMap::new();
         let mut pos = PointOfSale {
             display,
-            inventory: Inventory::new(inventory),
+            inventory: Inventory::new(HashMap::new()),
         };
         pos.on_barcode("");
         assert_eq!(pos.display.get_text(), "error: no barcode read");

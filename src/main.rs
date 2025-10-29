@@ -8,7 +8,7 @@ fn main() {
     let display = point_of_sale::Display {
         text: "".to_string(),
     };
-    let inventory = HashMap::from([("123456", "$7.95"), ("654321", "$6.50")]);
+    let inventory = HashMap::from([("123456", 795), ("654321", 650)]);
     let mut pos = PointOfSale {
         display,
         inventory: Inventory::new(inventory),
