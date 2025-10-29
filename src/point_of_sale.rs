@@ -1,12 +1,13 @@
-// Tests we need:
-// - product found -> output price   - Done
-// - product not found   - Done
-// - price is a price
-// - invalid, empty string and null(?)  - Done
+// Features
 //
-//
-// Notes
-// - We will use dollars
+// Calculate sales tax and add to price
+// Sell one item reduces inventory
+// Sell multiple items
+// 
+
+// price in cents as u32
+// keep dollar sign 
+
 
 use std::collections::HashMap;
 
@@ -46,10 +47,13 @@ impl PointOfSale {
             None => self.display.display_product_not_found(),
         }
     }
+    fn apply_tax(&mut self, price: &str) {
+        
+    }
 }
 
 pub struct Inventory {
-    pub products: HashMap<&'static str, &'static str>,
+    products: HashMap<&'static str, &'static str>,
 }
 impl Inventory {
     pub fn new(products: HashMap<&'static str, &'static str>) -> Inventory {
@@ -126,4 +130,19 @@ mod tests {
         pos.on_barcode("");
         assert_eq!(pos.display.get_text(), "error: no barcode read");
     }
+
+    // #[test]
+    // fn displays_price_including_tax() {
+    //     let tax = 0.2;
+    //     let display = Display {
+    //         text: "".to_string(),
+    //     };
+    //     let inventory = HashMap::from([("123456", "$7.95"), ("654321", "$10.00")]);
+    //     let mut pos = PointOfSale {
+    //         display,
+    //         inventory: Inventory::new(inventory),
+    //     };
+    //     pos.on_barcode("654321");
+    //     assert_eq!(pos.display.get_text(), "$12.00");
+    // }
 }
