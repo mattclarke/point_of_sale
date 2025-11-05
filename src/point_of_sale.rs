@@ -20,6 +20,9 @@ impl Display {
         let price_as_string = format!("${}.{:0>2}", price / 100, price % 100);
         self.set_text(&price_as_string);
     }
+    pub fn display_no_sale(&mut self) {
+        self.set_text("No sale in progress, please scan an item");
+    }
 }
 
 pub struct PointOfSale {
@@ -48,8 +51,9 @@ impl PointOfSale {
         }
     }
     fn on_transaction_finished(&mut self) {
-        self.display.set_text("No sale in progress, please scan an item");
+        self.display.display_no_sale();
     }
+
 }
 
 pub struct Inventory {
