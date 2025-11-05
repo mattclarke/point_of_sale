@@ -13,6 +13,7 @@ fn main() {
         display,
         inventory: Inventory::new(inventory),
         sales_tax: None,
+        total_amount: 0,
     };
     let mut barcode = String::new();
 
