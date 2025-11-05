@@ -23,6 +23,10 @@ impl Display {
     pub fn display_no_sale(&mut self) {
         self.set_text("No sale in progress, please scan an item");
     }
+    pub fn display_total(&mut self, total_amount: i32) {
+        let total_amount_as_string = format!("Total: ${}.{:0>2}", total_amount / 100, total_amount % 100);
+        self.set_text(&total_amount_as_string);
+    }
 }
 
 pub struct PointOfSale {
@@ -40,7 +44,8 @@ impl PointOfSale {
         match self.inventory.get_price(barcode) {
             Some(price) => {
                 let price = self.apply_tax(price);
-                self.display.display_price(price)
+                self.total_amount += price;
+                self.display.display_price(price);
             }
             None => self.display.display_product_not_found(),
         }
@@ -52,8 +57,14 @@ impl PointOfSale {
         }
     }
     fn on_transaction_finished(&mut self) {
-        self.display.display_no_sale();
+        if self.total_amount > 0 {
+            self.display.display_total(self.total_amount);
+        }
+        else {
+            self.display.display_no_sale();
+        }
     }
+
 
 }
 
@@ -190,5 +201,24 @@ mod tests {
         pos.on_barcode("123456");
         pos.on_transaction_finished();
         assert_eq!(pos.display.get_text(), "Total: $7.95");
+    }
+
+    #[test]
+    fn on_transaction_finished_with_3_items() {
+        let display = Display {
+            text: "".to_string(),
+        };
+        let inventory = HashMap::from([("123456", 795), ("654321", 650)]);
+        let mut pos = PointOfSale {
+            display,
+            inventory: Inventory::new(inventory),
+            sales_tax: None,
+            total_amount: 0,
+        };
+        pos.on_barcode("123456");
+        pos.on_barcode("123456");
+        pos.on_barcode("654321");
+        pos.on_transaction_finished();
+        assert_eq!(pos.display.get_text(), "Total: $22.40");
     }
 }
