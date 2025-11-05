@@ -47,6 +47,9 @@ impl PointOfSale {
             None => price,
         }
     }
+    fn on_transaction_finished(&mut self) {
+        self.display.set_text("No sale in progress, please scan an item");
+    }
 }
 
 pub struct Inventory {
@@ -144,5 +147,20 @@ mod tests {
         };
         pos.on_barcode("654321");
         assert_eq!(pos.display.get_text(), "$12.00");
+    }
+
+    #[test]
+    fn on_transaction_finished_with_zero_items() {
+        let display = Display {
+            text: "".to_string(),
+        };
+        let inventory = HashMap::new();
+        let mut pos = PointOfSale {
+            display,
+            inventory: Inventory::new(inventory),
+            sales_tax: None
+        };
+        pos.on_transaction_finished();
+        assert_eq!(pos.display.get_text(), "No sale in progress, please scan an item");
     }
 }
