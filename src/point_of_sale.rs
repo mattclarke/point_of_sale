@@ -17,14 +17,14 @@ impl Display {
         self.set_text("error: no barcode read");
     }
     pub fn display_price(&mut self, price: i32) {
-        let price_as_string = format!("${}.{:0>2}", price / 100, price % 100);
+        let price_as_string = format!("${}.{:0>2}", price / 100, price % 100);   // create a function to convert price to string
         self.set_text(&price_as_string);
     }
     pub fn display_no_sale(&mut self) {
         self.set_text("No sale in progress, please scan an item");
     }
     pub fn display_total(&mut self, total_amount: i32) {
-        let total_amount_as_string = format!("Total: ${}.{:0>2}", total_amount / 100, total_amount % 100);
+        let total_amount_as_string = format!("Total: ${}.{:0>2}", total_amount / 100, total_amount % 100);  //
         self.set_text(&total_amount_as_string);
     }
 }
@@ -35,7 +35,7 @@ pub struct PointOfSale {
     pub sales_tax: Option<f32>,
     pub total_amount: i32,
 }
-impl PointOfSale {
+impl PointOfSale {   // make a constructor
     pub fn on_barcode(&mut self, barcode: &str) {
         if barcode.is_empty() {
             self.display.display_no_barcode_read();
@@ -88,7 +88,7 @@ impl Inventory {
 }
 
 #[cfg(test)]
-mod tests {
+mod tests {  // create standard
     use super::*;
 
     #[test]
