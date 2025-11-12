@@ -7,24 +7,25 @@ impl Display {
     pub fn get_text(&self) -> &String {
         &self.text
     }
-    fn set_text(&mut self, text: &str) {
+    fn display_text(&mut self, text: &str) {
         self.text = text.to_string();
+        println!("{}", text);
     }
     pub fn display_product_not_found(&mut self) {
-        self.set_text("product not found");
+        self.display_text("product not found");
     }
     pub fn display_no_barcode_read(&mut self) {
-        self.set_text("error: no barcode read");
+        self.display_text("error: no barcode read");
     }
     pub fn display_price(&mut self, price: i32) {
-        self.set_text(&Self::format_price(price));
+        self.display_text(&Self::format_price(price));
     }
     pub fn display_no_sale(&mut self) {
-        self.set_text("No sale in progress, please scan an item");
+        self.display_text("No sale in progress, please scan an item");
     }
     pub fn display_total(&mut self, total_amount: i32) {
         let total_amount_as_string = format!("Total: {}", Self::format_price(total_amount));
-        self.set_text(&total_amount_as_string);
+        self.display_text(&total_amount_as_string);
     }
     fn format_price(price: i32) -> String {
         return format!("${}.{:0>2}", price / 100, price % 100);
@@ -66,7 +67,7 @@ impl PointOfSale {
             None => price,
         }
     }
-    fn on_transaction_finished(&mut self) {
+    pub fn on_transaction_finished(&mut self) {
         if self.total_amount > 0 {
             self.display.display_total(self.total_amount);
         } else {
