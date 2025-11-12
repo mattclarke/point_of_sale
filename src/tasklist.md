@@ -11,6 +11,6 @@ Sell multiple items
 - Sell 1 item on happy path - DONE
 - Sell 3 items on happy path - DONE
 - Barcode not found, enter price manually
-- Show total items and total price when finished
+- Show total items and total price when finished 
 - What happens if finished at 0 items - DONE
 - What happens if we scan a million items 
