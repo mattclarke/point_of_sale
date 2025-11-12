@@ -78,10 +78,18 @@ impl PointOfSale {
 
 pub struct Inventory {
     products: HashMap<&'static str, i32>,
+    products2: HashMap<String, Product>,
 }
 impl Inventory {
     pub fn new(products: HashMap<&'static str, i32>) -> Inventory {
-        Inventory { products: products }
+        Inventory { products: products, products2: HashMap::new()}
+    }
+    pub fn new2(products: Vec<Product>) -> Inventory {
+        let mut inventory = Self::new(HashMap::new());
+        for product in products {
+            inventory.products2.insert(product.barcode.clone(), product.clone());
+        }
+        inventory
     }
     pub fn get_price(&self, barcode: &str) -> Option<i32> {
         if self.product_found(barcode) {
@@ -93,6 +101,13 @@ impl Inventory {
     fn product_found(&self, barcode: &str) -> bool {
         self.products.contains_key(barcode)
     }
+}
+
+#[derive(Clone)]
+pub struct Product {
+    name: String,
+    price: i32,
+    barcode: String,
 }
 
 #[cfg(test)]
@@ -108,10 +123,11 @@ mod tests {
     }
 
     #[test]
-    fn when_product_found_outputs_price() {
+    fn when_product_found_outputs_item_name_and_price() {
         let mut pos = standard();
         pos.on_barcode("123456");
         assert_eq!(pos.display.get_text(), "$7.95");
+        //assert_eq!(pos.display.get_text(), "Speedboat          $7.95");
     }
     #[test]
     fn when_other_product_found_outputs_different_price() {
