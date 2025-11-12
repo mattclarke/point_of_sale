@@ -17,15 +17,19 @@ impl Display {
         self.set_text("error: no barcode read");
     }
     pub fn display_price(&mut self, price: i32) {
-        let price_as_string = format!("${}.{:0>2}", price / 100, price % 100);   // create a function to convert price to string
+        let price_as_string = self.format_price(price);
         self.set_text(&price_as_string);
     }
     pub fn display_no_sale(&mut self) {
         self.set_text("No sale in progress, please scan an item");
     }
     pub fn display_total(&mut self, total_amount: i32) {
-        let total_amount_as_string = format!("Total: ${}.{:0>2}", total_amount / 100, total_amount % 100);  //
+        let price_as_string = self.format_price(total_amount);
+        let total_amount_as_string = format!("Total: {}", price_as_string);
         self.set_text(&total_amount_as_string);
+    }
+    fn format_price(&mut self, price: i32) -> String {
+        return format!("${}.{:0>2}", price / 100, price % 100);
     }
 }
 
@@ -35,7 +39,19 @@ pub struct PointOfSale {
     pub sales_tax: Option<f32>,
     pub total_amount: i32,
 }
-impl PointOfSale {   // make a constructor
+impl PointOfSale {
+    pub fn new(
+        display: Display,
+        inventory: Inventory,
+        sales_tax: Option<f32>,
+    ) -> PointOfSale {
+        PointOfSale {
+            display,
+            inventory,
+            sales_tax,
+            total_amount: 0,
+        }
+    }
     pub fn on_barcode(&mut self, barcode: &str) {
         if barcode.is_empty() {
             self.display.display_no_barcode_read();
@@ -59,13 +75,10 @@ impl PointOfSale {   // make a constructor
     fn on_transaction_finished(&mut self) {
         if self.total_amount > 0 {
             self.display.display_total(self.total_amount);
-        }
-        else {
+        } else {
             self.display.display_no_sale();
         }
     }
-
-
 }
 
 pub struct Inventory {
@@ -88,116 +101,65 @@ impl Inventory {
 }
 
 #[cfg(test)]
-mod tests {  // create standard
+mod tests {
     use super::*;
 
-    #[test]
-    fn when_product_found_outputs_price() {
+    fn standard() -> PointOfSale {
         let display = Display {
             text: "".to_string(),
         };
-        let inventory = HashMap::from([("123456", 795), ("654321", 650)]);
-        let mut pos = PointOfSale {
-            display,
-            inventory: Inventory::new(inventory),
-            sales_tax: None,
-            total_amount: 0,
-        };
-        pos.on_barcode("123456");
-        assert_eq!(pos.display.get_text(), "$7.95");
+        let inventory = Inventory::new(HashMap::from([("123456", 795), ("654321", 1000)]));
+        PointOfSale::new(display, inventory, None)
     }
 
     #[test]
+    fn when_product_found_outputs_price() {
+        let mut pos = standard();
+        pos.on_barcode("123456");
+        assert_eq!(pos.display.get_text(), "$7.95");
+    }
+    #[test]
     fn when_other_product_found_outputs_different_price() {
-        let display = Display {
-            text: "".to_string(),
-        };
-        let inventory = HashMap::from([("123456", 795), ("654321", 650)]);
-        let mut pos = PointOfSale {
-            display,
-            inventory: Inventory::new(inventory),
-            sales_tax: None,
-            total_amount: 0,
-        };
+        let mut pos = standard();
         pos.on_barcode("654321");
-        assert_eq!(pos.display.get_text(), "$6.50");
+        assert_eq!(pos.display.get_text(), "$10.00");
     }
 
     #[test]
     fn product_not_found() {
-        let display = Display {
-            text: "".to_string(),
-        };
-        let mut pos = PointOfSale {
-            display,
-            inventory: Inventory::new(HashMap::new()),
-            sales_tax: None,
-            total_amount: 0,
-        };
+        let mut pos = standard();
         pos.on_barcode("999999");
         assert_eq!(pos.display.get_text(), "product not found");
     }
 
     #[test]
     fn displays_error_on_empty_barcode() {
-        let display = Display {
-            text: "".to_string(),
-        };
-        let mut pos = PointOfSale {
-            display,
-            inventory: Inventory::new(HashMap::new()),
-            sales_tax: None,
-            total_amount: 0,
-        };
+        let mut pos = standard();
         pos.on_barcode("");
         assert_eq!(pos.display.get_text(), "error: no barcode read");
     }
 
     #[test]
     fn displays_price_including_tax() {
-        let tax = 0.2;
-        let display = Display {
-            text: "".to_string(),
-        };
-        let inventory = HashMap::from([("123456", 795), ("654321", 1000)]);
-        let mut pos = PointOfSale {
-            display,
-            inventory: Inventory::new(inventory),
-            sales_tax: Some(tax),
-            total_amount: 0,
-        };
+        let mut pos = standard();
+        pos.sales_tax = Some(0.2);
         pos.on_barcode("654321");
         assert_eq!(pos.display.get_text(), "$12.00");
     }
 
     #[test]
     fn on_transaction_finished_with_zero_items() {
-        let display = Display {
-            text: "".to_string(),
-        };
-        let inventory = HashMap::new();
-        let mut pos = PointOfSale {
-            display,
-            inventory: Inventory::new(inventory),
-            sales_tax: None,
-            total_amount: 0,
-        };
+        let mut pos = standard();
         pos.on_transaction_finished();
-        assert_eq!(pos.display.get_text(), "No sale in progress, please scan an item");
+        assert_eq!(
+            pos.display.get_text(),
+            "No sale in progress, please scan an item"
+        );
     }
 
     #[test]
     fn on_transaction_finished_with_one_item() {
-        let display = Display {
-            text: "".to_string(),
-        };
-        let inventory = HashMap::from([("123456", 795), ("654321", 650)]);
-        let mut pos = PointOfSale {
-            display,
-            inventory: Inventory::new(inventory),
-            sales_tax: None,
-            total_amount: 0,
-        };
+        let mut pos = standard();
         pos.on_barcode("123456");
         pos.on_transaction_finished();
         assert_eq!(pos.display.get_text(), "Total: $7.95");
@@ -205,20 +167,11 @@ mod tests {  // create standard
 
     #[test]
     fn on_transaction_finished_with_3_items() {
-        let display = Display {
-            text: "".to_string(),
-        };
-        let inventory = HashMap::from([("123456", 795), ("654321", 650)]);
-        let mut pos = PointOfSale {
-            display,
-            inventory: Inventory::new(inventory),
-            sales_tax: None,
-            total_amount: 0,
-        };
+        let mut pos = standard();
         pos.on_barcode("123456");
         pos.on_barcode("123456");
         pos.on_barcode("654321");
         pos.on_transaction_finished();
-        assert_eq!(pos.display.get_text(), "Total: $22.40");
+        assert_eq!(pos.display.get_text(), "Total: $25.90");
     }
 }
