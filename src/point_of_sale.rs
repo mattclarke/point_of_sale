@@ -17,18 +17,16 @@ impl Display {
         self.set_text("error: no barcode read");
     }
     pub fn display_price(&mut self, price: i32) {
-        let price_as_string = self.format_price(price);
-        self.set_text(&price_as_string);
+        self.set_text(&Self::format_price(price));
     }
     pub fn display_no_sale(&mut self) {
         self.set_text("No sale in progress, please scan an item");
     }
     pub fn display_total(&mut self, total_amount: i32) {
-        let price_as_string = self.format_price(total_amount);
-        let total_amount_as_string = format!("Total: {}", price_as_string);
+        let total_amount_as_string = format!("Total: {}", Self::format_price(total_amount));
         self.set_text(&total_amount_as_string);
     }
-    fn format_price(&mut self, price: i32) -> String {
+    fn format_price(price: i32) -> String {
         return format!("${}.{:0>2}", price / 100, price % 100);
     }
 }
@@ -40,11 +38,7 @@ pub struct PointOfSale {
     pub total_amount: i32,
 }
 impl PointOfSale {
-    pub fn new(
-        display: Display,
-        inventory: Inventory,
-        sales_tax: Option<f32>,
-    ) -> PointOfSale {
+    pub fn new(display: Display, inventory: Inventory, sales_tax: Option<f32>) -> PointOfSale {
         PointOfSale {
             display,
             inventory,
@@ -173,5 +167,9 @@ mod tests {
         pos.on_barcode("654321");
         pos.on_transaction_finished();
         assert_eq!(pos.display.get_text(), "Total: $25.90");
+    }
+    #[test]
+    fn test_format_price() {
+        assert_eq!(Display::format_price(750), "$7.50")
     }
 }
