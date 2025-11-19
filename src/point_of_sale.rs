@@ -77,23 +77,23 @@ impl PointOfSale {
 }
 
 pub struct Inventory {
-    products: HashMap<&'static str, i32>,
-    products2: HashMap<String, Product>,
+    products: HashMap<String, Product>,
 }
 impl Inventory {
-    pub fn new(products: HashMap<&'static str, i32>) -> Inventory {
-        Inventory { products: products, products2: HashMap::new()}
-    }
-    pub fn new2(products: Vec<Product>) -> Inventory {
-        let mut inventory = Self::new(HashMap::new());
+    pub fn new(products: Vec<Product>) -> Inventory {
+        let mut inventory = Inventory {
+            products: HashMap::new(),
+        };
         for product in products {
-            inventory.products2.insert(product.barcode.clone(), product.clone());
+            inventory
+                .products
+                .insert(product.barcode.clone(), product.clone());
         }
         inventory
     }
     pub fn get_price(&self, barcode: &str) -> Option<i32> {
         if self.product_found(barcode) {
-            Some(self.products[barcode])
+            Some(self.products[barcode].price)
         } else {
             None
         }
@@ -105,9 +105,9 @@ impl Inventory {
 
 #[derive(Clone)]
 pub struct Product {
-    name: String,
-    price: i32,
-    barcode: String,
+    pub name: String,
+    pub price: i32,
+    pub barcode: String,
 }
 
 #[cfg(test)]
@@ -118,7 +118,18 @@ mod tests {
         let display = Display {
             text: "".to_string(),
         };
-        let inventory = Inventory::new(HashMap::from([("123456", 795), ("654321", 1000)]));
+        let inventory = Inventory::new(vec![
+            Product {
+                name: "Speedboat".to_string(),
+                price: 795,
+                barcode: "123456".to_string(),
+            },
+            Product {
+                name: "Rowboat".to_string(),
+                price: 1000,
+                barcode: "654321".to_string(),
+            },
+        ]);
         PointOfSale::new(display, inventory, None)
     }
 
