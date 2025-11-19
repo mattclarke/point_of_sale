@@ -17,8 +17,9 @@ impl Display {
     pub fn display_no_barcode_read(&mut self) {
         self.display_text("error: no barcode read");
     }
-    pub fn display_price(&mut self, price: i32) {
-        self.display_text(&Self::format_price(price));
+    pub fn display_price(&mut self, name: &str, price: i32) {
+        let item_text = format!("{: <20}{: >10}", name, Self::format_price(price));
+        self.display_text(&item_text);
     }
     pub fn display_no_sale(&mut self) {
         self.display_text("No sale in progress, please scan an item");
@@ -52,16 +53,16 @@ impl PointOfSale {
             self.display.display_no_barcode_read();
             return;
         }
-        match self.inventory.get_price(barcode) {
-            Some(price) => {
-                let price = self.apply_tax(price);
+        match self.inventory.get_item(barcode) {
+            Some(Product{price, name, ..}) => {
+                let price = self.apply_tax(*price);
                 self.total_amount += price;
-                self.display.display_price(price);
+                self.display.display_price(name, price);
             }
             None => self.display.display_product_not_found(),
         }
     }
-    fn apply_tax(&mut self, price: i32) -> i32 {
+    fn apply_tax(&self, price: i32) -> i32 {
         match self.sales_tax {
             Some(tax) => (price as f32 * (1.0 + tax)) as i32,
             None => price,
@@ -94,6 +95,13 @@ impl Inventory {
     pub fn get_price(&self, barcode: &str) -> Option<i32> {
         if self.product_found(barcode) {
             Some(self.products[barcode].price)
+        } else {
+            None
+        }
+    }
+    pub fn get_item(&self, barcode: &str) -> Option<&Product> {
+        if self.product_found(barcode) {
+            Some(&self.products[barcode])
         } else {
             None
         }
@@ -137,14 +145,13 @@ mod tests {
     fn when_product_found_outputs_item_name_and_price() {
         let mut pos = standard();
         pos.on_barcode("123456");
-        assert_eq!(pos.display.get_text(), "$7.95");
-        //assert_eq!(pos.display.get_text(), "Speedboat          $7.95");
+        assert_eq!(pos.display.get_text(), "Speedboat                $7.95");
     }
     #[test]
     fn when_other_product_found_outputs_different_price() {
         let mut pos = standard();
         pos.on_barcode("654321");
-        assert_eq!(pos.display.get_text(), "$10.00");
+        assert_eq!(pos.display.get_text(), "Rowboat                 $10.00");
     }
 
     #[test]
@@ -166,7 +173,7 @@ mod tests {
         let mut pos = standard();
         pos.sales_tax = Some(0.2);
         pos.on_barcode("654321");
-        assert_eq!(pos.display.get_text(), "$12.00");
+        assert_eq!(pos.display.get_text(), "Rowboat                 $12.00");
     }
 
     #[test]
