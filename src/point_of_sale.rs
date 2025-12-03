@@ -25,7 +25,7 @@ impl Display {
         self.display_text("No sale in progress, please scan an item");
     }
     pub fn display_total(&mut self, total_amount: i32) {
-        let total_amount_as_string = format!("Total: {}", Self::format_price(total_amount));
+        let total_amount_as_string = format!("{: <20}{: >10}", "Total:", Self::format_price(total_amount));
         self.display_text(&total_amount_as_string);
     }
     fn format_price(price: i32) -> String {
@@ -145,13 +145,17 @@ mod tests {
     fn when_product_found_outputs_item_name_and_price() {
         let mut pos = standard();
         pos.on_barcode("123456");
-        assert_eq!(pos.display.get_text(), "Speedboat                $7.95");
+        let mut price = pos.display.get_text().split_whitespace();
+        assert_eq!(price.next().unwrap(), "Speedboat");
+        assert_eq!(price.next().unwrap(), "$7.95");
     }
     #[test]
     fn when_other_product_found_outputs_different_price() {
         let mut pos = standard();
         pos.on_barcode("654321");
-        assert_eq!(pos.display.get_text(), "Rowboat                 $10.00");
+        let mut price = pos.display.get_text().split_whitespace();
+        assert_eq!(price.next().unwrap(), "Rowboat");
+        assert_eq!(price.next().unwrap(), "$10.00");
     }
 
     #[test]
@@ -173,7 +177,9 @@ mod tests {
         let mut pos = standard();
         pos.sales_tax = Some(0.2);
         pos.on_barcode("654321");
-        assert_eq!(pos.display.get_text(), "Rowboat                 $12.00");
+        let mut price = pos.display.get_text().split_whitespace();
+        assert_eq!(price.next().unwrap(), "Rowboat");
+        assert_eq!(price.next().unwrap(), "$12.00");
     }
 
     #[test]
@@ -191,7 +197,9 @@ mod tests {
         let mut pos = standard();
         pos.on_barcode("123456");
         pos.on_transaction_finished();
-        assert_eq!(pos.display.get_text(), "Total: $7.95");
+        let mut total = pos.display.get_text().split_whitespace();
+        assert_eq!(total.next().unwrap(), "Total:");
+        assert_eq!(total.next().unwrap(), "$7.95");
     }
 
     #[test]
@@ -201,7 +209,9 @@ mod tests {
         pos.on_barcode("123456");
         pos.on_barcode("654321");
         pos.on_transaction_finished();
-        assert_eq!(pos.display.get_text(), "Total: $25.90");
+        let mut total = pos.display.get_text().split_whitespace();
+        assert_eq!(total.next().unwrap(), "Total:");
+        assert_eq!(total.next().unwrap(), "$25.90");
     }
     #[test]
     fn test_format_price() {
