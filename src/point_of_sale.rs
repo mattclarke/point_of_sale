@@ -75,6 +75,9 @@ impl PointOfSale {
             self.display.display_no_sale();
         }
     }
+    pub fn on_next_transaction(&mut self) {
+        self.total_amount = 0;
+    }
 }
 
 pub struct Inventory {
@@ -213,4 +216,16 @@ mod tests {
     fn test_format_price() {
         assert_eq!(Display::format_price(750), "$7.50")
     }
+
+    #[test]
+    fn test_next_transaction_starts() {
+        let mut pos = standard();
+        pos.on_barcode("123456");
+        pos.on_transaction_finished();
+        pos.on_next_transaction();
+        pos.on_barcode("123456");
+        pos.on_transaction_finished();
+        check_output(pos.display.get_text(), ("Total:", "$7.95"));
+    } 
+
 }

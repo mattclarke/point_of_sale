@@ -22,19 +22,27 @@ fn main() {
     ]);
     let mut pos = PointOfSale::new(display, inventory, None);
 
-    loop {
-        let mut barcode = String::new();
-        println!("Enter barcode:");
-        io::stdin()
-            .read_line(&mut barcode)
-            .expect("Failed to read line");
+    'outer: loop {
+        pos.on_next_transaction();
+        loop {
+            let mut barcode = String::new();
+            println!("Enter barcode:");
+            io::stdin()
+                .read_line(&mut barcode)
+                .expect("Failed to read line");
 
-        barcode = barcode.trim().to_string();
+            barcode = barcode.trim().to_string();
 
-        if barcode == "total" {
-            break;
+            if barcode == "finish" {
+                pos.on_transaction_finished();
+                break;
+            }
+            if barcode == "exit" {
+                pos.on_transaction_finished();
+                break 'outer;
+            }
+            pos.on_barcode(&barcode);
         }
-        pos.on_barcode(&barcode);
+        println!("=================");
     }
-    pos.on_transaction_finished();
 }
