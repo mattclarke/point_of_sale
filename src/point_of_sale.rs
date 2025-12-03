@@ -164,7 +164,7 @@ mod tests {
     }
 
     #[test]
-    fn product_not_found() {
+    fn product_not_found_shows_error_message() {
         let mut pos = standard();
         pos.on_barcode("999999");
         assert_eq!(pos.display.get_text(), "product not found");
@@ -175,6 +175,13 @@ mod tests {
         let mut pos = standard();
         pos.on_barcode("");
         assert_eq!(pos.display.get_text(), "error: no barcode read");
+    }
+
+    #[test]
+    fn can_enter_price_manually() {
+        let mut pos = standard();
+        pos.on_enter_manual_price("12.34");
+        check_output(pos.display.get_text(), ("Manual entry", "$12.34"));
     }
 
     #[test]
