@@ -62,6 +62,14 @@ impl PointOfSale {
             None => self.display.display_product_not_found(),
         }
     }
+    pub fn on_enter_manual_price(&mut self, price: &str) {
+        let price = price.replace(".", "");
+        let price = match price.parse::<i32>() {
+            Ok(price) => price,
+            Err(e) => {return;}
+        };
+        self.display.display_price("Manual entry", price);
+    }
     fn apply_tax(&self, price: i32) -> i32 {
         match self.sales_tax {
             Some(tax) => (price as f32 * (1.0 + tax)) as i32,
@@ -178,10 +186,10 @@ mod tests {
     }
 
     #[test]
-    fn can_enter_price_manually() {
+    fn can_enter_price_manually_when_no_barcode() {
         let mut pos = standard();
         pos.on_enter_manual_price("12.34");
-        check_output(pos.display.get_text(), ("Manual entry", "$12.34"));
+        assert_eq!(pos.display.get_text(), "Manual entry            $12.34");
     }
 
     #[test]
