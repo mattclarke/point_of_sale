@@ -33,6 +33,12 @@ fn main() {
 
             barcode = barcode.trim().to_string();
 
+            if barcode.starts_with("manual ") {
+                let price = barcode.replace("manual ", "");
+                pos.on_enter_manual_price(&price);
+                continue;
+            }
+
             if barcode == "finish" {
                 pos.on_transaction_finished();
                 break;

@@ -203,8 +203,14 @@ mod tests {
         pos.on_enter_manual_price("ABC");
         assert_output(pos.display.get_text(), "error: invalid price entered");
     }
-    // too many decimal points
-    // too many full stops
+
+    #[test]
+    fn manually_entered_price_gets_added_to_total() {
+        let mut pos = standard();
+        pos.on_enter_manual_price("12.34");
+        pos.on_transaction_finished();
+        assert_output(pos.display.get_text(), "Total: $12.34");
+    }
 
     #[test]
     fn displays_price_including_tax() {
