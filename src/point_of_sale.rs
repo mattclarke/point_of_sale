@@ -152,23 +152,22 @@ mod tests {
         PointOfSale::new(display, inventory, None)
     }
 
-    fn check_output(input: &str, expected_words: (&str, &str)) {
-        let mut words = input.split_whitespace();
-        assert_eq!(words.next().unwrap(), expected_words.0);
-        assert_eq!(words.next().unwrap(), expected_words.1);
+    fn assert_output(input: &str, expected: &str) {
+        let words: Vec<&str> = input.split_whitespace().collect();
+        assert_eq!(words.join(" "), expected);
     }
 
     #[test]
     fn when_product_found_outputs_item_name_and_price() {
         let mut pos = standard();
         pos.on_barcode("123456");
-        check_output(pos.display.get_text(), ("Speedboat", "$7.95"));
+        assert_output(pos.display.get_text(), "Speedboat $7.95");
     }
     #[test]
     fn when_other_product_found_outputs_different_price() {
         let mut pos = standard();
         pos.on_barcode("654321");
-        check_output(pos.display.get_text(), ("Rowboat", "$10.00"));
+        assert_output(pos.display.get_text(), "Rowboat $10.00");
     }
 
     #[test]
@@ -189,7 +188,7 @@ mod tests {
     fn can_enter_price_manually_when_no_barcode() {
         let mut pos = standard();
         pos.on_enter_manual_price("12.34");
-        assert_eq!(pos.display.get_text(), "Manual entry            $12.34");
+        assert_output(pos.display.get_text(), "Manual entry $12.34");
     }
 
     #[test]
@@ -197,7 +196,7 @@ mod tests {
         let mut pos = standard();
         pos.sales_tax = Some(0.2);
         pos.on_barcode("654321");
-        check_output(pos.display.get_text(), ("Rowboat", "$12.00"));
+        assert_output(pos.display.get_text(), "Rowboat $12.00");
     }
 
     #[test]
@@ -215,7 +214,7 @@ mod tests {
         let mut pos = standard();
         pos.on_barcode("123456");
         pos.on_transaction_finished();
-        check_output(pos.display.get_text(), ("Total:", "$7.95"));
+        assert_output(pos.display.get_text(), "Total: $7.95");
     }
 
     #[test]
@@ -225,7 +224,7 @@ mod tests {
         pos.on_barcode("123456");
         pos.on_barcode("654321");
         pos.on_transaction_finished();
-        check_output(pos.display.get_text(), ("Total:", "$25.90"));
+        assert_output(pos.display.get_text(), "Total: $25.90");
     }
     #[test]
     fn test_format_price() {
@@ -240,7 +239,7 @@ mod tests {
         pos.on_next_transaction();
         pos.on_barcode("123456");
         pos.on_transaction_finished();
-        check_output(pos.display.get_text(), ("Total:", "$7.95"));
+        assert_output(pos.display.get_text(), "Total: $7.95");
     } 
 
 }
