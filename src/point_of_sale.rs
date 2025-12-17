@@ -17,6 +17,9 @@ impl Display {
     pub fn display_no_barcode_read(&mut self) {
         self.display_text("error: no barcode read");
     }
+    pub fn display_entered_price_invalid(&mut self) {
+        self.display_text("error: invalid price entered");
+    }
     pub fn display_price(&mut self, name: &str, price: i32) {
         let item_text = format!("{: <20}{: >10}", name, Self::format_price(price));
         self.display_text(&item_text);
@@ -66,7 +69,10 @@ impl PointOfSale {
         let price = price.replace(".", "");
         let price = match price.parse::<i32>() {
             Ok(price) => price,
-            Err(e) => {return;}
+            Err(e) => {
+                self.display.display_entered_price_invalid();
+                return;
+            }
         };
         self.display.display_price("Manual entry", price);
     }
@@ -190,6 +196,15 @@ mod tests {
         pos.on_enter_manual_price("12.34");
         assert_output(pos.display.get_text(), "Manual entry $12.34");
     }
+
+    #[test]
+    fn error_message_printed_if_manually_entered_price_is_invalid() {
+        let mut pos = standard();
+        pos.on_enter_manual_price("ABC");
+        assert_output(pos.display.get_text(), "error: invalid price entered");
+    }
+    // too many decimal points
+    // too many full stops
 
     #[test]
     fn displays_price_including_tax() {
