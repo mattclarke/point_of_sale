@@ -74,6 +74,7 @@ impl PointOfSale {
                 return;
             }
         };
+        self.total_amount += price;
         self.display.display_price("Manual entry", price);
     }
     fn apply_tax(&self, price: i32) -> i32 {
