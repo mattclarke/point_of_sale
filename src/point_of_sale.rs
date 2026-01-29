@@ -292,4 +292,10 @@ mod tests {
         assert_output(pos.display.get_text(), "Manual entry $123.00");
     }
 
+            #[test]
+    fn test_one_decimal_place_for_manually_entered_price() {
+        let mut pos = standard();
+        pos.on_enter_manual_price("123.4");
+        assert_output(pos.display.get_text(), "Manual entry $123.40");
+    }
 }
