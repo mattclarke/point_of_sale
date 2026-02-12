@@ -72,14 +72,14 @@ impl PointOfSale {
         let mut parts = price.split(".");
         let decimals = parts.nth(1);
         let price = match decimals {
-            Some(d) => {
-                if d.len() > 2 {
-                    return Err(());
-                } else if d.len() == 1 {
-                    format!("{}0", price)
-                } else {
-                    price.to_string()
-                }
+            Some(d) if d.len() > 2 => {
+                return Err(());
+            }
+            Some(d) if d.len() == 1 => {
+                format!("{}0", price)
+            }
+            Some(_) => {
+                price.to_string()
             }
             None => {
                 format!("{}.00", price)
