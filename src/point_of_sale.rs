@@ -66,6 +66,10 @@ impl PointOfSale {
         }
     }
     pub fn on_enter_manual_price(&mut self, price: &str) {
+        if price.chars().filter(|c|*c=='.').count() > 1 {
+            self.display.display_entered_price_invalid();
+            return;
+        }
         let mut parts = price.split(".");
         let decimals = parts.nth(1);
         let price = match decimals{
@@ -297,10 +301,19 @@ mod tests {
         assert_output(pos.display.get_text(), "Manual entry $123.00");
     }
 
-            #[test]
+    #[test]
     fn test_one_decimal_place_for_manually_entered_price() {
         let mut pos = standard();
         pos.on_enter_manual_price("123.4");
         assert_output(pos.display.get_text(), "Manual entry $123.40");
     }
+
+    #[test]
+    fn test_too_many_points_for_manually_entered_price() {
+        let mut pos = standard();
+        pos.on_enter_manual_price("123..45");
+        assert_output(pos.display.get_text(), "error: invalid price entered");
+    }
+
+
 }
