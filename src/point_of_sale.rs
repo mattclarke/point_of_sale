@@ -71,21 +71,20 @@ impl PointOfSale {
     fn normalise_decimal_places(&self, price: &str) -> Result<String, ()> {
         let mut parts = price.split(".");
         let decimals = parts.nth(1);
-        let price = match decimals {
+        match decimals {
             Some(d) if d.len() > 2 => {
-                return Err(());
+                Err(())
             }
             Some(d) if d.len() == 1 => {
-                format!("{}0", price)
+                Ok(format!("{}0", price))
             }
             Some(_) => {
-                price.to_string()
+                Ok(price.to_string())
             }
             None => {
-                format!("{}.00", price)
+                Ok(format!("{}.00", price))
             }
-        };
-        Ok(price)
+        }
     }
 
     pub fn on_enter_manual_price(&mut self, price: &str) {
