@@ -28,7 +28,8 @@ impl Display {
         self.display_text("No sale in progress, please scan an item");
     }
     pub fn display_total(&mut self, total_amount: i32) {
-        let total_amount_as_string = format!("{: <20}{: >10}", "Total:", Self::format_price(total_amount));
+        let total_amount_as_string =
+            format!("{: <20}{: >10}", "Total:", Self::format_price(total_amount));
         self.display_text(&total_amount_as_string);
     }
     fn format_price(price: i32) -> String {
@@ -51,13 +52,14 @@ impl PointOfSale {
             total_amount: 0,
         }
     }
+
     pub fn on_barcode(&mut self, barcode: &str) {
         if barcode.is_empty() {
             self.display.display_no_barcode_read();
             return;
         }
         match self.inventory.get_item(barcode) {
-            Some(Product{price, name, ..}) => {
+            Some(Product { price, name, .. }) => {
                 let price = self.apply_tax(*price);
                 self.total_amount += price;
                 self.display.display_price(name, price);
@@ -65,30 +67,37 @@ impl PointOfSale {
             None => self.display.display_product_not_found(),
         }
     }
-    pub fn on_enter_manual_price(&mut self, price: &str) {
-        if price.chars().filter(|c|*c=='.').count() > 1 {
-            self.display.display_entered_price_invalid();
-            return;
-        }
+
+    fn normalise_decimal_places(&self, price: &str) -> Result<String, ()> {
         let mut parts = price.split(".");
         let decimals = parts.nth(1);
-        let price = match decimals{
+        let price = match decimals {
             Some(d) => {
                 if d.len() > 2 {
-                    self.display.display_entered_price_invalid();
-                    return;
-                }
-                else if d.len() == 1 {
+                    return Err(());
+                } else if d.len() == 1 {
                     format!("{}0", price)
-                }
-                else {
+                } else {
                     price.to_string()
                 }
-            },
+            }
             None => {
                 format!("{}.00", price)
             }
         };
+        Ok(price)
+    }
+
+    pub fn on_enter_manual_price(&mut self, price: &str) {
+        if price.chars().filter(|c| *c == '.').count() > 1 {
+            self.display.display_entered_price_invalid();
+            return;
+        }
+        let Ok(price) = self.normalise_decimal_places(price) else {
+            self.display.display_entered_price_invalid();
+            return;
+        };
+        // parsing the price
         let price = price.replace(".", "");
         let price = match price.parse::<i32>() {
             Ok(price) => price,
@@ -97,15 +106,18 @@ impl PointOfSale {
                 return;
             }
         };
+        // applying the price
         self.total_amount += price;
         self.display.display_price("Manual entry", price);
     }
+
     fn apply_tax(&self, price: i32) -> i32 {
         match self.sales_tax {
             Some(tax) => (price as f32 * (1.0 + tax)) as i32,
             None => price,
         }
     }
+
     pub fn on_transaction_finished(&mut self) {
         if self.total_amount > 0 {
             self.display.display_total(self.total_amount);
@@ -113,6 +125,7 @@ impl PointOfSale {
             self.display.display_no_sale();
         }
     }
+
     pub fn on_next_transaction(&mut self) {
         self.total_amount = 0;
     }
@@ -285,7 +298,7 @@ mod tests {
         pos.on_barcode("123456");
         pos.on_transaction_finished();
         assert_output(pos.display.get_text(), "Total: $7.95");
-    } 
+    }
 
     #[test]
     fn test_too_many_decimal_places_for_manually_entered_price() {
@@ -294,7 +307,7 @@ mod tests {
         assert_output(pos.display.get_text(), "error: invalid price entered");
     }
 
-        #[test]
+    #[test]
     fn test_no_decimal_places_for_manually_entered_price() {
         let mut pos = standard();
         pos.on_enter_manual_price("123");
@@ -314,6 +327,4 @@ mod tests {
         pos.on_enter_manual_price("123..45");
         assert_output(pos.display.get_text(), "error: invalid price entered");
     }
-
-
 }
