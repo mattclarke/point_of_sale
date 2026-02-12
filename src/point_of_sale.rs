@@ -74,7 +74,12 @@ impl PointOfSale {
                     self.display.display_entered_price_invalid();
                     return;
                 }
-                price.to_string()
+                else if d.len() == 1 {
+                    format!("{}0", price)
+                }
+                else {
+                    price.to_string()
+                }
             },
             None => {
                 format!("{}.00", price)
